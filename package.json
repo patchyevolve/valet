@@ -1,0 +1,35 @@
+{
+  "name": "valentines-interactive-webpage",
+  "version": "1.0.0",
+  "description": "A state-driven Valentine's Day interactive webpage with emotional journey",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "serve": "http-server dist -p 3000",
+    "lint": "eslint src/**/*.ts",
+    "clean": "rimraf dist"
+  },
+  "keywords": [
+    "valentine",
+    "interactive",
+    "typescript",
+    "state-machine"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "fast-check": "^3.15.0",
+    "http-server": "^14.0.0",
+    "jsdom": "^27.4.0",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}
