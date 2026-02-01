@@ -33,8 +33,10 @@ export class AccessibilityControllerImpl implements AccessibilityController {
     // Check CSS media query for reduced motion preference
     if (window.matchMedia) {
       const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-      this.reducedMotionEnabled = mediaQuery.matches;
-      return this.reducedMotionEnabled;
+      if (mediaQuery) {
+        this.reducedMotionEnabled = mediaQuery.matches;
+        return this.reducedMotionEnabled;
+      }
     }
     
     // Fallback: check for manual accessibility setting
@@ -48,7 +50,18 @@ export class AccessibilityControllerImpl implements AccessibilityController {
    */
   disableAnimations(animationTypes: AnimationType[]): void {
     // Store disabled animation types for reference
-    const disabledTypes = JSON.parse(localStorage.getItem('accessibility-disabled-animations') || '[]');
+    const disabledTypesStr = localStorage.getItem('accessibility-disabled-animations') || '[]';
+    let disabledTypes: string[] = [];
+    
+    try {
+      disabledTypes = JSON.parse(disabledTypesStr);
+      if (!Array.isArray(disabledTypes)) {
+        disabledTypes = [];
+      }
+    } catch (error) {
+      disabledTypes = [];
+    }
+    
     animationTypes.forEach(type => {
       if (!disabledTypes.includes(type)) {
         disabledTypes.push(type);
@@ -218,20 +231,24 @@ export class AccessibilityControllerImpl implements AccessibilityController {
     // Listen for reduced motion preference changes
     if (window.matchMedia) {
       const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-      reducedMotionQuery.addEventListener('change', (e) => {
-        this.reducedMotionEnabled = e.matches;
-        if (e.matches) {
-          this.disableAnimations(['particles', 'parallax', 'gradients']);
-          this.announceToScreenReader('Reduced motion mode activated');
-        }
-      });
+      if (reducedMotionQuery && reducedMotionQuery.addEventListener) {
+        reducedMotionQuery.addEventListener('change', (e) => {
+          this.reducedMotionEnabled = e.matches;
+          if (e.matches) {
+            this.disableAnimations(['particles', 'parallax', 'gradients']);
+            this.announceToScreenReader('Reduced motion mode activated');
+          }
+        });
+      }
 
       // Listen for high contrast preference changes
       const highContrastQuery = window.matchMedia('(prefers-contrast: high)');
-      highContrastQuery.addEventListener('change', (e) => {
-        this.highContrastEnabled = e.matches;
-        this.applyHighContrastMode(e.matches);
-      });
+      if (highContrastQuery && highContrastQuery.addEventListener) {
+        highContrastQuery.addEventListener('change', (e) => {
+          this.highContrastEnabled = e.matches;
+          this.applyHighContrastMode(e.matches);
+        });
+      }
     }
   }
 
@@ -409,7 +426,9 @@ export class AccessibilityControllerImpl implements AccessibilityController {
   private detectHighContrastPreference(): void {
     if (window.matchMedia) {
       const highContrastQuery = window.matchMedia('(prefers-contrast: high)');
-      this.highContrastEnabled = highContrastQuery.matches;
+      if (highContrastQuery) {
+        this.highContrastEnabled = highContrastQuery.matches;
+      }
     }
   }
 
