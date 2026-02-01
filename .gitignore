@@ -92,4 +92,4 @@ jspm_packages/
 # TernJS port file
 .tern-port
 
-.kiro/
+.kiro/specs
