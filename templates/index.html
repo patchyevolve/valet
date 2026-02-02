@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💕 Valentine's Day Interactive Experience 💕</title>
+    <meta name="description" content="A romantic, interactive Valentine's Day experience with vibrant colors and beautiful animations">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="{{ url_for('static', filename='css/valentine.css') }}" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='js/valentine.js') }}" as="script">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/valentine.css') }}">
+    
+    <!-- Meta tags for better experience -->
+    <meta name="theme-color" content="#ff6b9d">
+    <meta name="color-scheme" content="light">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💕</text></svg>">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading" class="state-container active">
+        <div class="loading-content">
+            <div class="heart-loader">
+                <div class="heart"></div>
+                <div class="heart"></div>
+                <div class="heart"></div>
+            </div>
+            <h1 class="loading-title">A Moment for You</h1>
+            <p class="loading-subtitle">Preparing something special...</p>
+            <div class="loading-progress">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+        <div class="floating-particles"></div>
+    </div>
+
+    <!-- Ambient Idle State -->
+    <div id="ambient-idle" class="state-container">
+        <div class="ambient-content">
+            <h1 class="main-title">Welcome to Our Moment</h1>
+            <p class="subtitle">Take a deep breath and let your heart guide you</p>
+            <div class="interaction-hint">
+                <span class="hint-text">Click anywhere to begin this journey</span>
+                <div class="pulse-ring"></div>
+            </div>
+        </div>
+        <div class="ambient-background">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+            <div class="gradient-orb orb-3"></div>
+        </div>
+    </div>
+
+    <!-- Intro Text State -->
+    <div id="intro-text" class="state-container">
+        <div class="text-container">
+            <div id="text-display" class="typewriter-text"></div>
+            <div class="text-cursor"></div>
+        </div>
+        <div class="sparkles-container"></div>
+    </div>
+
+    <!-- Presence Acknowledgement -->
+    <div id="presence-acknowledgement" class="state-container">
+        <div class="presence-content">
+            <h2 class="presence-title">Your presence here means everything</h2>
+            <p class="presence-text">In a world full of distractions, you chose to be here, in this moment</p>
+            <div class="scroll-indicator">
+                <div class="scroll-arrow"></div>
+                <span>Scroll to continue</span>
+            </div>
+        </div>
+        <div class="presence-effects">
+            <div class="ripple-effect"></div>
+        </div>
+    </div>
+
+    <!-- Distance Visualization -->
+    <div id="distance-visualization" class="state-container">
+        <div class="distance-content">
+            <div class="distance-text top-text">Sometimes we start far apart...</div>
+            <div class="parallax-container">
+                <div class="distance-element element-1"></div>
+                <div class="distance-element element-2"></div>
+                <div class="connection-line"></div>
+            </div>
+            <div class="distance-text bottom-text">But closeness is always possible</div>
+        </div>
+    </div>
+
+    <!-- Personal Memory -->
+    <div id="personal-memory" class="state-container">
+        <div class="memory-container">
+            <div class="memory-frame">
+                <div id="memory-display" class="memory-text"></div>
+            </div>
+            <div class="memory-effects">
+                <div class="golden-particles"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Valentine Question -->
+    <div id="valentine-question" class="state-container">
+        <div class="question-container">
+            <div class="question-frame">
+                <div id="question-display" class="question-text"></div>
+                <div class="heart-beat-effect"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Decision State -->
+    <div id="decision-state" class="state-container">
+        <div class="decision-container">
+            <h2 class="decision-title">What does your heart say?</h2>
+            <div class="decision-buttons">
+                <button class="decision-btn yes-btn" data-choice="yes">
+                    <span class="btn-icon">💕</span>
+                    <span class="btn-text">Yes, I feel the same way</span>
+                    <div class="btn-glow"></div>
+                </button>
+                <button class="decision-btn maybe-btn" data-choice="maybe">
+                    <span class="btn-icon">💭</span>
+                    <span class="btn-text">I need some time to think</span>
+                    <div class="btn-glow"></div>
+                </button>
+                <button class="decision-btn friends-btn" data-choice="friends">
+                    <span class="btn-icon">🤗</span>
+                    <span class="btn-text">I'd rather stay friends</span>
+                    <div class="btn-glow"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation State (Video) -->
+    <div id="confirmation-state" class="state-container">
+        <div class="video-container">
+            <div class="video-frame">
+                {% if video_exists %}
+                <video id="valentine-video" class="main-video" controls preload="metadata">
+                    <source src="{{ url_for('serve_video', filename='valentine-video.mp4') }}" type="video/mp4">
+                    <p class="video-fallback">Your browser doesn't support video playback, but our love is still real! ❤️</p>
+                </video>
+                {% else %}
+                <div class="video-fallback-container">
+                    <div class="fallback-heart">💕</div>
+                    <h2>Video not available</h2>
+                    <p>But imagine the most beautiful love story playing right here! ✨</p>
+                </div>
+                {% endif %}
+                <div id="video-overlay" class="video-overlay">
+                    <span class="love-message">I love you</span>
+                </div>
+            </div>
+            <div class="celebration-effects">
+                <div class="confetti-container"></div>
+                <div class="heart-explosion"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gentle Exit State -->
+    <div id="gentle-exit-state" class="state-container">
+        <div class="exit-container">
+            <div class="exit-content">
+                <h2 class="exit-title">Thank You</h2>
+                <div id="exit-message" class="exit-message">
+                    <p>Your honesty means the world to me.</p>
+                    <p>Whatever you choose, you are valued and loved.</p>
+                </div>
+                <div class="gentle-hearts">
+                    <span class="gentle-heart">💙</span>
+                    <span class="gentle-heart">🤗</span>
+                    <span class="gentle-heart">✨</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Handling -->
+    <div id="error-state" class="state-container" style="display: none;">
+        <div class="error-container">
+            <h2>Something went wrong</h2>
+            <p>But love always finds a way! ❤️</p>
+            <button onclick="location.reload()" class="retry-btn">Try Again</button>
+        </div>
+    </div>
+
+    <!-- Audio for enhanced experience (optional) -->
+    <audio id="ambient-audio" loop preload="none">
+        <!-- Add ambient audio file if available -->
+    </audio>
+
+    <!-- Screen reader announcements -->
+    <div aria-live="polite" aria-atomic="true" class="sr-only" id="announcements"></div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/valentine.js') }}"></script>
+    
+    <!-- Inline script for immediate initialization -->
+    <script>
+        // Immediate error handling
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            console.error('JavaScript Error:', msg, 'at', url, ':', lineNo);
+            ValentineApp.handleError('JavaScript error occurred');
+            return false;
+        };
+        
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                try {
+                    ValentineApp.initialize();
+                } catch (error) {
+                    console.error('Initialization error:', error);
+                    ValentineApp.handleError('Failed to initialize application');
+                }
+            });
+        } else {
+            try {
+                ValentineApp.initialize();
+            } catch (error) {
+                console.error('Initialization error:', error);
+                ValentineApp.handleError('Failed to initialize application');
+            }
+        }
+    </script>
+</body>
+</html>
