@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: valentine-webpage-personal
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn app:app"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FLASK_ENV
+        value: production

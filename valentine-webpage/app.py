@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
 Valentine's Day Interactive Flask Application
-A romantic, fault-tolerant web experience with vibrant UI
+A romantic, fault-tolerant web experience with vibrant UI and PIN protection
 """
 
 import os
 import logging
 import mimetypes
 from pathlib import Path
-from flask import Flask, render_template, jsonify, request, send_from_directory, abort
+from flask import Flask, render_template, jsonify, request, send_from_directory, abort, session, redirect, url_for
 from werkzeug.exceptions import RequestEntityTooLarge
 import traceback
 
@@ -26,10 +26,11 @@ logger = logging.getLogger(__name__)
 # Initialize Flask app with robust configuration
 app = Flask(__name__)
 app.config.update(
-    SECRET_KEY=os.environ.get('SECRET_KEY', 'valentine-secret-key-2024'),
+    SECRET_KEY=os.environ.get('SECRET_KEY', 'valentine-secret-key-2026-with-pin-protection'),
     MAX_CONTENT_LENGTH=50 * 1024 * 1024,  # 50MB max file size
     TEMPLATES_AUTO_RELOAD=True,
-    SEND_FILE_MAX_AGE_DEFAULT=0  # Disable caching for development
+    SEND_FILE_MAX_AGE_DEFAULT=0,  # Disable caching for development
+    VALENTINE_PIN='230908'  # Your personal PIN
 )
 
 # Fault checking: Ensure required directories exist
@@ -45,15 +46,15 @@ class ValentineState:
     def __init__(self):
         self.states = [
             'loading',
-            'ambient_idle',
-            'intro_text', 
-            'presence_acknowledgement',
-            'distance_visualization',
-            'personal_memory',
-            'valentine_question',
-            'decision_state',
-            'confirmation_state',
-            'gentle_exit_state'
+            'ambient-idle',
+            'intro-text', 
+            'presence-acknowledgement',
+            'distance-visualization',
+            'personal-memory',
+            'valentine-question',
+            'decision-state',
+            'confirmation-state',
+            'gentle-exit-state'
         ]
         self.current_state = 'loading'
         self.user_choices = {}
@@ -65,8 +66,11 @@ class ValentineState:
             logger.error(f"Invalid state type: {type(state)}")
             return False
         
-        if state not in self.states:
-            logger.error(f"Unknown state: {state}")
+        # Convert underscores to hyphens for compatibility
+        normalized_state = state.replace('_', '-')
+        
+        if normalized_state not in self.states:
+            logger.error(f"Unknown state: {state} (normalized: {normalized_state})")
             return False
         
         return True
@@ -74,12 +78,15 @@ class ValentineState:
     def transition_to(self, new_state):
         """Safely transition between states"""
         try:
+            # Normalize state name (convert underscores to hyphens)
+            normalized_state = new_state.replace('_', '-')
+            
             if not self.validate_state(new_state):
                 raise ValueError(f"Invalid state transition to: {new_state}")
             
             old_state = self.current_state
-            self.current_state = new_state
-            logger.info(f"State transition: {old_state} -> {new_state}")
+            self.current_state = normalized_state
+            logger.info(f"State transition: {old_state} -> {normalized_state}")
             return True
             
         except Exception as e:
@@ -102,6 +109,19 @@ class ValentineState:
 
 # Global state manager
 valentine_state = ValentineState()
+
+def check_pin_access():
+    """Check if user has entered correct PIN"""
+    return session.get('pin_verified') == True
+
+def require_pin(f):
+    """Decorator to require PIN for protected routes"""
+    def decorated_function(*args, **kwargs):
+        if not check_pin_access():
+            return redirect(url_for('pin_entry'))
+        return f(*args, **kwargs)
+    decorated_function.__name__ = f.__name__
+    return decorated_function
 
 @app.errorhandler(404)
 def not_found_error(error):
@@ -126,8 +146,9 @@ def too_large(error):
     return jsonify({'error': 'File too large! Love should be limitless, but files have limits 😅'}), 413
 
 @app.route('/')
+@require_pin
 def index():
-    """Main route with comprehensive fault checking"""
+    """Main route with comprehensive fault checking - PIN protected"""
     try:
         # Reset state for new session
         valentine_state.transition_to('loading')
@@ -153,9 +174,54 @@ def index():
         logger.error(traceback.format_exc())
         return f"Error loading page, but love persists! ❤️<br>Error: {str(e)}", 500
 
+@app.route('/pin')
+def pin_entry():
+    """PIN entry page"""
+    try:
+        # If already verified, redirect to main page
+        if check_pin_access():
+            return redirect(url_for('index'))
+        
+        return render_template('pin_entry.html')
+        
+    except Exception as e:
+        logger.error(f"Error in PIN entry route: {e}")
+        return f"PIN entry error - but love will find a way! ❤️<br>Error: {str(e)}", 500
+
+@app.route('/verify_pin', methods=['POST'])
+def verify_pin():
+    """Verify PIN and grant access"""
+    try:
+        data = request.get_json() if request.is_json else request.form
+        entered_pin = data.get('pin', '').strip()
+        
+        if entered_pin == app.config['VALENTINE_PIN']:
+            session['pin_verified'] = True
+            session.permanent = True  # Keep session across browser restarts
+            logger.info("PIN verified successfully")
+            return jsonify({
+                'success': True,
+                'message': 'Welcome to our special moment! 💕',
+                'redirect': url_for('index')
+            })
+        else:
+            logger.warning(f"Invalid PIN attempt: {entered_pin}")
+            return jsonify({
+                'success': False,
+                'message': 'Incorrect PIN. Please try again. 💔'
+            }), 401
+            
+    except Exception as e:
+        logger.error(f"PIN verification error: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'Verification error - please try again.'
+        }), 500
+
 @app.route('/api/state/<state_name>', methods=['POST'])
+@require_pin
 def transition_state(state_name):
-    """API endpoint for state transitions with validation"""
+    """API endpoint for state transitions with validation - PIN protected"""
     try:
         if not valentine_state.validate_state(state_name):
             return jsonify({'error': 'Invalid state', 'success': False}), 400
@@ -175,8 +241,9 @@ def transition_state(state_name):
         return jsonify({'error': str(e), 'success': False}), 500
 
 @app.route('/api/choice', methods=['POST'])
+@require_pin
 def record_choice():
-    """API endpoint for recording user choices"""
+    """API endpoint for recording user choices - PIN protected"""
     try:
         data = request.get_json()
         if not data:

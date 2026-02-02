@@ -82,13 +82,49 @@
     <!-- Distance Visualization -->
     <div id="distance-visualization" class="state-container">
         <div class="distance-content">
-            <div class="distance-text top-text">Sometimes we start far apart...</div>
-            <div class="parallax-container">
-                <div class="distance-element element-1"></div>
-                <div class="distance-element element-2"></div>
-                <div class="connection-line"></div>
+            <!-- Glass panel container for the animation -->
+            <div class="distance-glass-panel">
+                <div class="distance-scene" id="distance-scene">
+                    <!-- Clean scene with just pins and path -->
+                    <div class="distance-pin pin-you" id="pin-you">
+                        <div class="pin-label">You</div>
+                    </div>
+                    <div class="distance-pin pin-me" id="pin-me">
+                        <div class="pin-label">Me</div>
+                    </div>
+                    
+                    <!-- Heart-shaped SVG path -->
+                    <svg class="heart-path-svg" viewBox="0 0 800 400" id="heart-svg">
+                        <path id="heart-path" 
+                              d="M 150 200 Q 200 120, 280 160 Q 360 100, 400 200 Q 440 100, 520 160 Q 600 120, 650 200" 
+                              stroke="rgba(255, 107, 157, 0.8)" 
+                              stroke-width="3" 
+                              stroke-dasharray="12,6" 
+                              fill="none" 
+                              opacity="0"/>
+                        <g id="paper-plane" opacity="0" style="display: none;">
+                            <path d="M-12,-4 L12,0 L-12,4 L-4,0 Z" 
+                                  fill="rgba(255,255,255,0.95)" 
+                                  stroke="rgba(255,107,157,0.9)" 
+                                  stroke-width="1.5"/>
+                        </g>
+                    </svg>
+                    
+                    <!-- Sequential romantic text -->
+                    <div class="romantic-text-sequence" id="romantic-text-sequence">
+                        <div class="text-line" data-text="Distance can keep us apart"></div>
+                        <div class="text-line" data-text="but love keeps us closer to each other"></div>
+                        <div class="text-line" data-text="every time and everywhere"></div>
+                        <div class="text-line" data-text="I am here for you"></div>
+                    </div>
+                </div>
             </div>
-            <div class="distance-text bottom-text">But closeness is always possible</div>
+            
+            <!-- Scroll continue indicator (outside glass panel) -->
+            <div class="scroll-continue-indicator" id="scroll-continue-indicator">
+                <div class="scroll-text">Scroll to continue</div>
+                <div class="scroll-arrow">↓</div>
+            </div>
         </div>
     </div>
 
@@ -143,7 +179,7 @@
         <div class="video-container">
             <div class="video-frame">
                 {% if video_exists %}
-                <video id="valentine-video" class="main-video" controls preload="metadata">
+                <video id="valentine-video" class="main-video" autoplay muted preload="metadata">
                     <source src="{{ url_for('serve_video', filename='valentine-video.mp4') }}" type="video/mp4">
                     <p class="video-fallback">Your browser doesn't support video playback, but our love is still real! ❤️</p>
                 </video>
@@ -155,7 +191,13 @@
                 </div>
                 {% endif %}
                 <div id="video-overlay" class="video-overlay">
-                    <span class="love-message">I love you</span>
+                    <span class="love-message">I love you kuku</span>
+                </div>
+                <div id="video-exit-button" class="video-exit-button" style="display: none;">
+                    <button onclick="ValentineApp.exitToGentle()" class="exit-btn">
+                        <span>💕</span>
+                        <span>Continue</span>
+                    </button>
                 </div>
             </div>
             <div class="celebration-effects">
@@ -200,7 +242,7 @@
     <!-- Screen reader announcements -->
     <div aria-live="polite" aria-atomic="true" class="sr-only" id="announcements"></div>
 
-    <!-- JavaScript -->
+    <!-- JavaScript - Optimized -->
     <script src="{{ url_for('static', filename='js/valentine.js') }}"></script>
     
     <!-- Inline script for immediate initialization -->
